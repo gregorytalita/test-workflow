@@ -1,0 +1,40 @@
+service: jolly-landing-page
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: ruby2.7
+  stage: dev
+  region: sa-east-1
+
+iam:
+  role:
+    statements:
+    - Effect: Allow
+      Action:
+      - dynamodb:PutItem
+
+functions:
+  signup:
+    handler: handler.signup
+    events:
+      - http:
+          path: /signup
+          method: post
+
+resources:
+  Resources:
+    Table:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: newslettersignups
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

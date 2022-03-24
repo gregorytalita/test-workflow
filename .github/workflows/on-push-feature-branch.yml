@@ -1,0 +1,32 @@
+name: on push feature branch
+
+on:
+  push:
+
+env:
+  AWS_REGION: sa-east-1
+  AWS_ROLE_PLATFORM: arn:aws:iam::389370449781:role/Automation
+jobs:
+  deploy-bucket:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_PLATFORM }}
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - run: npm ci
+      - name: serverless deploy
+        uses: serverless/github-action@v3
+        with:
+          args: deploy
+
+
